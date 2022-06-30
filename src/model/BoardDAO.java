@@ -54,7 +54,7 @@ public class BoardDAO {
 		getCon();
 		try {
 			// 쿼리 작성
-			String sql = "SELECT * FROM (SELECT A.*, ROWNUM RNUM FROM (SELECT * FROM BOARD ORDER BY REF DESC, RE_STEP ASC)A) WHERE RNUM >=? AND RNUM <=?";
+			String sql = "SELECT * FROM (SELECT A.*, ROWNUM RNUM FROM (SELECT * FROM BOARD ORDER BY REF DESC, RE_LEVEL ASC)A) WHERE RNUM >=? AND RNUM <=?";
 			// 쿼리 실행할 객체 선언
 			pstmt = con.prepareStatement(sql);
 			pstmt.setInt(1, startRow);
@@ -162,4 +162,37 @@ public class BoardDAO {
 		return bean;
 	}
 
+	// 답변글을 저장하는 메소드
+	public void reInsertBoard(BoardBean bean) {
+		getCon();
+		int ref=bean.getRef();
+		int re_step=bean.getRe_step();
+		int re_level=bean.getRe_level(); 
+		try {
+			// 쿼리작성
+			String levelspl = "UPDATE BOARD SET RE_LEVEL = RE_LEVEL+1 WHERE REF=? AND RE_LEVEL >?"; //이렇게 해야 LEVEL이 +1 이 되고 남은 LEVEL에 넣을 수 있음
+			pstmt = con.prepareStatement(levelspl);
+			pstmt.setInt(1, ref);
+			pstmt.setInt(2, re_level);
+
+			pstmt.executeQuery();
+
+			String sql = "INSERT INTO BOARD VALUES(BOARD_SEQ.NEXTVAL,?,?,?,?,SYSDATE,?,?,?,0,?)";
+			pstmt = con.prepareStatement(sql);
+			//?
+			pstmt.setString(1, bean.getWriter());
+			pstmt.setString(2, bean.getEmail());
+			pstmt.setString(3, bean.getSubject());
+			pstmt.setString(4, bean.getPassword());
+			pstmt.setInt(5, ref);
+			pstmt.setInt(6, re_step+1);// 기존 부모글에 스텝보다 1을 증가
+			pstmt.setInt(7, re_level+1);// 기존 부모글에 스텝보다 1을 증가 아까 LEVEL+1한거중 LEVEL숫자에 해당하는 숫자가 삽입된다
+			pstmt.setString(8, bean.getContent());
+			
+			pstmt.executeUpdate();
+			con.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
