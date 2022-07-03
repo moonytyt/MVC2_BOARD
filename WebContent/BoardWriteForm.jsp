@@ -42,7 +42,7 @@
 				<tr height="40">
 					<td align="center" colspan="2"><input type="submit"
 						value="글쓰기">&nbsp;&nbsp; <input type="reset" value="다시 작성">&nbsp;&nbsp;
-						<button onclick="location.href='BoardListCon.do'">전체 게시글 보기</button>
+						<input type="button" value="전체게시글보기" onclick="location.href='BoardListCon.do'"> 
 					</td>
 				</tr>
 			</table>

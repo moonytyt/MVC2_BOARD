@@ -9,7 +9,22 @@
 <title>Insert title here</title>
 </head>
 <body>
-
+	 <c:if test="${msg=='실패' }">
+	 	<script type="text/javascript">
+	 		alert("비밀번호가 틀렸습니다.");
+	 		history.go(-1);
+	 	</script>
+	 </c:if>
+	 <c:if test="${msg=='수정성공' }">
+	 	<script type="text/javascript">
+	 		alert("게시글수정이 완료되었습니다");
+	 	</script>
+	 </c:if>
+	  <c:if test="${msg=='삭제성공' }">
+	 	<script type="text/javascript">
+	 		alert("게시글을 삭제했습니다.");
+	 	</script>
+	 </c:if>
 	<center>
 		<h2>전체 게시글 보기</h2>
 		<table width="700" border="1">

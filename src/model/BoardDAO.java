@@ -85,25 +85,25 @@ public class BoardDAO {
 		}
 		return list;
 	}
-	
+
 	// 하나의 게시글을 저장하는 메소드 호출
 	public void insertBoard(BoardBean bean) {
 		getCon();
-		int ref=0;
-		int re_step=1; //새글이기 때문에
-		int re_level=1; // 새글이기 때문에
+		int ref = 0;
+		int re_step = 1; // 새글이기 때문에
+		int re_level = 1; // 새글이기 때문에
 		try {
 			// 쿼리작성
 			String refspl = "SELECT MAX(REF) FROM BOARD";
 			pstmt = con.prepareStatement(refspl);
-			// 쿼리 실행후 결과를  리턴
+			// 쿼리 실행후 결과를 리턴
 			rs = pstmt.executeQuery();
-			if(rs.next()){
-				ref=rs.getInt(1)+1;// 가장큰값에 1을 더해줌
+			if (rs.next()) {
+				ref = rs.getInt(1) + 1;// 가장큰값에 1을 더해줌
 			}
 			String sql = "INSERT INTO BOARD VALUES(BOARD_SEQ.NEXTVAL,?,?,?,?,SYSDATE,?,?,?,0,?)";
 			pstmt = con.prepareStatement(sql);
-			//?
+			// ?
 			pstmt.setString(1, bean.getWriter());
 			pstmt.setString(2, bean.getEmail());
 			pstmt.setString(3, bean.getSubject());
@@ -112,7 +112,7 @@ public class BoardDAO {
 			pstmt.setInt(6, re_step);
 			pstmt.setInt(7, re_level);
 			pstmt.setString(8, bean.getContent());
-			
+
 			pstmt.executeUpdate();
 			con.close();
 		} catch (Exception e) {
@@ -120,26 +120,26 @@ public class BoardDAO {
 		}
 	}
 
-	//하나의 게시글을 읽어드리는 메소드 작성
+	// 하나의 게시글을 읽어드리는 메소드 작성
 	public BoardBean getOneBoard(int num) {
 		getCon();
 		BoardBean bean = null;
-		
+
 		try {
-			//하나의 게시글을 읽었다는 조회수 증가
+			// 하나의 게시글을 읽었다는 조회수 증가
 			String countsql = "UPDATE BOARD SET READCOUNT = READCOUNT + 1 WHERE NUM =?";
 			pstmt = con.prepareStatement(countsql);
 			pstmt.setInt(1, num);
-			//쿼리실행
+			// 쿼리실행
 			pstmt.executeUpdate();
-			
+
 			// 한게시글에 대한 정보를 리턴해주는 쿼리 작성
 			String sql = "SELECT * FROM BOARD WHERE NUM=?";
 			pstmt = con.prepareStatement(sql);
 			pstmt.setInt(1, num);
-			//쿼리실행 후 결과를 리턴
+			// 쿼리실행 후 결과를 리턴
 			rs = pstmt.executeQuery();
-			if(rs.next()){//하나의 게시글이 존재한다면
+			if (rs.next()) {// 하나의 게시글이 존재한다면
 				bean = new BoardBean();
 				bean.setNum(rs.getInt(1));
 				bean.setWriter(rs.getString(2));
@@ -157,20 +157,63 @@ public class BoardDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
+
+		return bean;
+	}
+
+	// 조회수를 증가하지 않는 하나의 게시글을 리턴하는 메소드
+	public BoardBean getoneUpdateBoard(int num) {
+		getCon();
+		BoardBean bean = null;
+
+		try {
+			// 한게시글에 대한 정보를 리턴해주는 쿼리 작성
+			String sql = "SELECT * FROM BOARD WHERE NUM=?";
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, num);
+			// 쿼리실행 후 결과를 리턴
+			rs = pstmt.executeQuery();
+			if (rs.next()) {// 하나의 게시글이 존재한다면
+				bean = new BoardBean();
+				bean.setNum(rs.getInt(1));
+				bean.setWriter(rs.getString(2));
+				bean.setEmail(rs.getString(3));
+				bean.setSubject(rs.getString(4));
+				bean.setPassword(rs.getString(5));
+				bean.setReg_date(rs.getDate(6).toString());
+				bean.setRef(rs.getInt(7));
+				bean.setRe_step(rs.getInt(8));
+				bean.setRe_level(rs.getInt(9));
+				bean.setReadcount(rs.getInt(10));
+				bean.setContent(rs.getString(11));
+			}
+			con.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return bean;
 	}
 
 	// 답변글을 저장하는 메소드
 	public void reInsertBoard(BoardBean bean) {
 		getCon();
-		int ref=bean.getRef();
-		int re_step=bean.getRe_step();
-		int re_level=bean.getRe_level(); 
+		int ref = bean.getRef();
+		int re_step = bean.getRe_step();
+		int re_level = bean.getRe_level();
 		try {
 			// 쿼리작성
-			String levelspl = "UPDATE BOARD SET RE_LEVEL = RE_LEVEL+1 WHERE REF=? AND RE_LEVEL >?"; //이렇게 해야 LEVEL이 +1 이 되고 남은 LEVEL에 넣을 수 있음
+			String levelspl = "UPDATE BOARD SET RE_LEVEL = RE_LEVEL+1 WHERE REF=? AND RE_LEVEL >?"; // 이렇게
+																									// 해야
+																									// LEVEL이
+																									// +1
+																									// 이
+																									// 되고
+																									// 남은
+																									// LEVEL에
+																									// 넣을
+																									// 수
+																									// 있음
 			pstmt = con.prepareStatement(levelspl);
 			pstmt.setInt(1, ref);
 			pstmt.setInt(2, re_level);
@@ -179,20 +222,61 @@ public class BoardDAO {
 
 			String sql = "INSERT INTO BOARD VALUES(BOARD_SEQ.NEXTVAL,?,?,?,?,SYSDATE,?,?,?,0,?)";
 			pstmt = con.prepareStatement(sql);
-			//?
+			// ?
 			pstmt.setString(1, bean.getWriter());
 			pstmt.setString(2, bean.getEmail());
 			pstmt.setString(3, bean.getSubject());
 			pstmt.setString(4, bean.getPassword());
 			pstmt.setInt(5, ref);
-			pstmt.setInt(6, re_step+1);// 기존 부모글에 스텝보다 1을 증가
-			pstmt.setInt(7, re_level+1);// 기존 부모글에 스텝보다 1을 증가 아까 LEVEL+1한거중 LEVEL숫자에 해당하는 숫자가 삽입된다
+			pstmt.setInt(6, re_step + 1);// 기존 부모글에 스텝보다 1을 증가
+			pstmt.setInt(7, re_level + 1);// 기존 부모글에 스텝보다 1을 증가 아까 LEVEL+1한거중
+											// LEVEL숫자에 해당하는 숫자가 삽입된다
 			pstmt.setString(8, bean.getContent());
-			
+
 			pstmt.executeUpdate();
 			con.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	// 하나의 게시글을 수정하는 메소드
+	public void updateBoard(int num, String subject, String content) {
+
+		getCon();
+		try {
+			String sql = "UPDATE BOARD SET SUBJECT=?, CONTENT=? WHERE NUM=?";
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, subject);
+			pstmt.setString(2, content);
+			pstmt.setInt(3, num);
+			
+			pstmt.executeUpdate();
+			
+			//자원반납
+			con.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	
+	// 게시글 삭제 메소드
+	public void deleteBoard(int ref) {
+		
+		getCon();
+		
+		try {
+			String sql = "DELETE FROM BOARD WHERE REF = ?";
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, ref);
+			pstmt.executeUpdate();
+			
+			con.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 }

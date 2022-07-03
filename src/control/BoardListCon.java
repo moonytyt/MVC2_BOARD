@@ -57,12 +57,17 @@ public class BoardListCon extends HttpServlet {
 		// number=130 즉 130번째 입력된 글부터 보인다
 		number = count - (currentPage - 1) * pageSize;
 		
+		//수정, 삭제시 비밀번호가 틀렸다면
+		String msg = (String) request.getAttribute("msg");
+		
 		// BoardList.jsp쪽으로 request객체에 담아서 넘겨줌
 		request.setAttribute("list", list);
 		request.setAttribute("number", number);
 		request.setAttribute("pageSize", pageSize);
 		request.setAttribute("count", count);
 		request.setAttribute("currentPage", currentPage);
+		
+		request.setAttribute("msg", msg);
 		
 		RequestDispatcher dis = request.getRequestDispatcher("BoardList.jsp");
 		dis.forward(request, response);
